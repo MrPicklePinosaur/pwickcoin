@@ -15,7 +15,4 @@ export class Block {
         this.timeStamp = timeStamp;
         this.data = data;
     }
-
-
-
 }
