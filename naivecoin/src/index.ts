@@ -1,4 +1,7 @@
-import sha256 from 'crypto-js/sha256';
+import { Blockchain } from './Blockchain'
 
-console.log(sha256("1").toString());
+const bc = new Blockchain();
 
+bc.generateBlock('1');
+bc.generateBlock('2');
+console.log(bc.blockchain);
