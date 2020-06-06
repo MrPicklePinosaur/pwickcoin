@@ -1,24 +1,23 @@
 {
   "name": "naivecoin",
   "version": "1.0.0",
-  "main": "main.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npm run development",
-    "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
-    "watch": "npm run development -- --watch",
-    "hot": "cross-env NODE_ENV=development node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
-    "prod": "npm run production",
-    "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
+    "start:dev": "nodemon"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "keywords": [],
-  "description": "",
   "devDependencies": {
-    "cross-env": "^7.0.2",
-    "laravel-mix": "^5.0.4",
-    "ts-loader": "^7.0.5",
+    "@types/node": "^14.0.11",
+    "nodemon": "^2.0.4",
+    "ts-node": "^8.10.2",
     "typescript": "^3.9.5"
+  },
+  "dependencies": {
+    "@types/crypto-js": "^3.1.47",
+    "crypto-js": "^4.0.0"
   }
 }
