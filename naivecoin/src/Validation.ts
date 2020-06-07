@@ -1,4 +1,5 @@
 import { Block } from './Block'
+import { Transaction } from './Transaction'
 
 //collection of methods to validate a block
 
@@ -71,7 +72,21 @@ export class Validation {
         return true;
     }
 
+    //transaction =-=-=-=-=-=-=-=
+    static verifyTransactionHash(transaction: Transaction): boolean {
+        return Transaction.calculateTransactionHash(transaction) === transaction.hash;
+    }
 
+    static verifyTransactionInputs(): boolean {
+        return false;
+    }
+
+    static verifyTransactionOutputs(): boolean {
+        return false;
+    }
+
+
+    //helpers
     static hashHexToBin(hex: string): string {
         //TODO: check to make sure length of hash is right
 

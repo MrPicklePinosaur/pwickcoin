@@ -5,8 +5,8 @@ export const ec = new ecdsa.ec('secp256k1');
 
 export type TransIn = {
 
-    outId: string, //owner of the money
-    outIndex: number, //reference to the TransOut that the money came from
+    outId: string, //reference to unspent money (UnspentTransOut)
+    outIndex: number, 
     signature: string
 }
 
@@ -16,16 +16,16 @@ export type TransOut = {
 }
 
 export type UnspentTransOut = { //leftover money from transaction, made as a transaction to self
-    readonly id: string,  
-    readonly index: number, //value to reference this blob of money
+    readonly id: string,  //reference to the transaction this came from
+    readonly index: number, //a unique idetifier for this blob of money (just index in array lmao)
     readonly address: string, //owner of the money
     readonly amount: number
 }
 
+//the request that each person makes
 export class Transaction {
 
-    public id: string = ''; //a random string (should be 256 bits)
-    public hash: string = '';
+    public hash: string = ''; //calculated using the contents of transInList and transOutList
     public transInList: TransIn[] = [];
     public transOutList: TransOut[] = [];
 
@@ -34,30 +34,66 @@ export class Transaction {
     }
 
     //only use when transaction object is full
-    calculateTransactionHash(): string {
+    static calculateTransactionHash({transInList, transOutList}: Transaction): string {
 
-        const transInString = this.transInList
+        const transInString = transInList
             .map(({outId, outIndex}: TransIn) => outId+outIndex )
             .reduce((acc, cur) => acc+cur, '');
 
-        const transOutString = this.transOutList
+        const transOutString = transOutList
             .map(({address, amount}: TransOut) => address+amount )
             .reduce((acc, cur) => acc+cur, '');
 
-        return sha256(this.id+transInString+transOutString).toString();
+        return sha256(transInString+transOutString).toString();
 
     }
 
     //not finished
-    static signTransaction({id, transInList}: Transaction, transInIndex: number, privateKey: string): string {
+    static signTransaction({hash,transInList}: Transaction, transInIndex: number, privateKey: string): string {
 
         const transIn = transInList[transInIndex]; //the specific transaction we are signing
 
         const key = ec.keyFromPrivate(privateKey,'hex');
-        const signature = Transaction.toHexString(key.sign(id).toDER()); 
+        const signature = Transaction.toHexString(key.sign(hash).toDER()); 
 
         return signature;
     }
+
+
+    //UPON RECIEVING NEW BLOCK
+
+    //grab all out transactions, create new unspent objects and add to personal list
+    getAllUnspent(newTransactions: Transaction[]): UnspentTransOut[] {
+        return newTransactions
+            .map((trans) => {
+                return trans.transOutList.map((outTrans, i) => {
+                    return {
+                        id: trans.hash, 
+                        index: i,
+                        address: outTrans.address,
+                        amount: outTrans.amount
+                    };
+                });
+            })
+            .reduce((a,b) => a.concat(b), []);
+    }
+    
+    //grab all in transactions and remove the unspent objects that those reference from our personal list
+    getAllConsumed(newTransactions: Transaction[]): UnspentTransOut[] {
+        return newTransactions
+            .map((trans) => trans.transInList) //grab all transIns from each transaction
+            .reduce((a,b) => a.concat(b), []) //make it into a 1D array
+            .map((transIn) => {
+                return { //create placeholder unspent object, just so we can filter by id and index later
+                    id: transIn.outId,
+                    index: transIn.outIndex,
+                    address: '',
+                    amount: 0
+                }
+            });
+    }
+
+    //helpers
 
     //from https://github.com/lhartikk/naivecoin/blob/chapter3/src/transaction.ts
     static toHexString(byteArray: string) {
