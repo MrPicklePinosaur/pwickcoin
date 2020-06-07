@@ -14,11 +14,16 @@ export default {
     name: "Login",
     methods: {
         onSubmit(){
-            const lmao = {
+            if (this.password.length>0 && this.user.length>0){
+                /*const info = {
                 user:this.user,
                 password:this.password
+                }*/
+                localStorage.setItem('jwt',this.password)
+                //this.$emit('login',info);
+                this.$router.push('Summary')
             }
-            this.$emit('login',lmao);
+            
         }
     }
 }
