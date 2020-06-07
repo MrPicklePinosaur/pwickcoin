@@ -6,12 +6,16 @@ export const ec = new ecdsa.ec('secp256k1');
 
 export class Wallet {
 
-    private privateKey: string; //this is non-persistant for now, possibly store in local storage later
+    public privateKey: string; //this is non-persistant for now, possibly store in local storage later
     public publicKey: string; //also know as the address
 
     constructor() {
         this.privateKey = Wallet.generatePrivateKey();
         this.publicKey = Wallet.generatePublicKey(this.privateKey);
+    }
+
+    getKey() { //used for signing
+        return ec.keyFromPrivate(this.privateKey,'hex');
     }
 
     static generatePublicKey(privateKey: string): string {

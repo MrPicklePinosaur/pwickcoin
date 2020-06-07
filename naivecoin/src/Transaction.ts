@@ -1,4 +1,5 @@
 import sha256 from 'crypto-js/sha256'
+import { Wallet } from './Wallet';
 
 export const BLOCK_REWARD = 50; //amount of units rewarded to a miner who finds a block
 
@@ -88,6 +89,15 @@ export class Transaction {
 
     }
 
+    //sign all input transactions
+    static signTransaction({hash,transInList}: Transaction, wallet: Wallet) {
+        transInList
+        .map((transIn) => {
+            const key = wallet.getKey();
+            transIn.signature = Transaction.toHexString(key.sign(hash).toDER());
+        });
+    }
+
     //generates the trans out objects for a given transaction
     static findUnspentForTransaction(amount: number, senderUnspent: UnspentTransOut[]) {
         var curValue = 0;
@@ -106,19 +116,6 @@ export class Transaction {
         //if we didnt have enough coins
         throw Error('Not enough balance to make payment');
     }
-
-    //not finished
-    /*
-    static signTransaction({hash,transInList}: Transaction, transInIndex: number, privateKey: string): string {
-
-        const transIn = transInList[transInIndex]; //the specific transaction we are signing
-
-        const key = ec.keyFromPrivate(privateKey,'hex');
-        const signature = Transaction.toHexString(key.sign(hash).toDER()); 
-
-        return signature;
-    }
-    */
 
 
     //UPON RECIEVING NEW BLOCK
