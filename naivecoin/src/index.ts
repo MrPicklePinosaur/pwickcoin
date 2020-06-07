@@ -2,12 +2,12 @@ import { Blockchain } from './Blockchain'
 
 import io from 'socket.io-client'
 
-const serverSocket = io.connect('http://localhost:5000');
+enum MSG {
+    NEW_TRANSACTION
+}
 
 const bc = new Blockchain();
 
-/*
-console.log(bc.blockchain);
+const socket = io.connect('http://localhost:5000');
 
-console.log(bc.validateBlockChain(bc.blockchain));
-*/
+//socket.emit();
