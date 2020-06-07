@@ -1,6 +1,4 @@
-import sha256 from 'crypto-js/sha256'
-
-import { Block } from './block.service'
+import { Block, calculateBlockHash } from './block.service'
 import { hashHexToBin, currentTimeStamp } from './helper.service'
 
 //validateBlock() - used to validate any given block
@@ -79,7 +77,5 @@ export const verifyTimeStamp = (timeStamp: number, prevTimeStamp: number): boole
     return true;
 }
 
-export const calculateBlockHash = (index: number, previousHash: string, timeStamp: number, data: string, difficulty: number, proof: number): string => {
-    return sha256(index+previousHash+timeStamp+data+difficulty+proof).toString();
-}
+
 

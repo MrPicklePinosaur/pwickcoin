@@ -18,7 +18,7 @@ export type UnspentTransOut = { //leftover money from transaction, made as a tra
     readonly amount: number
 }
 
-export type transaction = {
+export type Transaction = {
     hash: string; //calculated using the contents of transInList and transOutList
     transInList: TransIn[];
     transOutList: TransOut[];
