@@ -19,14 +19,19 @@ export class Validation {
     static validateBlock(block: Block, prevBlock: Block): boolean {
        
         if (prevBlock.index+1 !== block.index) {
+            console.log('BLOCK VALIDATION FAILED: blocks not in order');
             return false;
         } else if (prevBlock.hash !== block.previousHash) {
+            console.log('BLOCK VALIDATION FAILED: previousHash invalid');
             return false;
         } else if (Validation.calculateBlockHash(block.index,block.previousHash,block.timeStamp,block.data,block.difficulty,block.proof) !== block.hash) {
+            console.log('BLOCK VALIDATION FAILED: block hash invalid');
             return false;
-        } else if (Validation.verifyProofOfWork(block.hash,block.difficulty)) {
+        } else if (!Validation.verifyProofOfWork(block.hash,block.difficulty)) {
+            console.log('BLOCK VALIDATION FAILED: proof of work invalid');
             return false;
-        } else if (Validation.verifyTimeStamp(block.timeStamp,prevBlock.timeStamp)) {
+        } else if (!Validation.verifyTimeStamp(block.timeStamp,prevBlock.timeStamp)) {
+            console.log('BLOCK VALIDATION FAILED: time stamp invalid');
             return false;
         }
 
@@ -37,12 +42,17 @@ export class Validation {
         
         //TODO: validate types of data recieved
         //also make sure recieved blockchain isnt empty and stuff
+        if (newChain.length == 1) {
+            //validate one block only
+            return true;
+        }
         
         //check if the genesis matches
         
         //go through entire chain and validate all the blocks
         for (var i = 1; i < newChain.length; i++) {
             if (!Validation.validateBlock(newChain[i],newChain[i-1])) {
+                console.log(`failed at block number ${i}`)
                 return false;
             }
         }
@@ -55,7 +65,8 @@ export class Validation {
     static verifyProofOfWork(hash: string, difficulty: number): boolean {
         //the hash comes in as hex 
         const binHash = Validation.hashHexToBin(hash);
-        const prefix = '0'.repeat(difficulty); //hash must start with this many zeroes
+        const prefix = '0'.repeat(difficulty)
+        //hash must start with this many zeroes
         return binHash.startsWith(prefix);
     }
 

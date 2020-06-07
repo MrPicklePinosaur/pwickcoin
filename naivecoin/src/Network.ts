@@ -4,6 +4,7 @@ import { Blockchain } from './Blockchain';
 import { Transaction } from './Transaction';
 import { Miner } from './Miner';
 import { Block } from './Block';
+import { Validation } from './Validation';
 
 enum MSG_TYPE {
     JOINED = 'joined', //called when we join
@@ -58,10 +59,15 @@ export class Network {
 
             //do verification stuff here and stuffs
 
+
             //add it to our block chain
             this.blockchain.blockchain.push(newBlock);
-            //console.log('=-=-=-=-=-=-=-=');
-            //console.log(this.blockchain.bdlockchain);
+
+            //we can also check to see if our current blockchain (as a whole) is valid
+            if (!Validation.validateBlockChain(this.blockchain.blockchain)) {
+                console.log('our blockchain is INVALID!!');
+            }
+
         });
 
         this.startMining();
@@ -77,6 +83,7 @@ export class Network {
             var newBlock = Miner.generateBlock(transactions, block_reward, this.blockchain);
             
             //tell everyone that we found a new block
+            //console.log(`we found a block ${newBlock.hash}`);
             this.socket.emit(MSG_TYPE.NEW_BLOCK, {block: JSON.stringify(newBlock)});
             //this.blockchain.blockchain.push(newBlock);
         }, 2000);

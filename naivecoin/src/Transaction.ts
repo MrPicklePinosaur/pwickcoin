@@ -65,12 +65,25 @@ export class Transaction {
 
     //UPON RECIEVING NEW BLOCK
 
+    static updateUnspent(newTransactions: Transaction[], curUnspent: UnspentTransOut[]) {
+        //verify the validity of the transaction here
+
+        //now update the local unspent
+        const newUnspent = Transaction.getAllUnspent(newTransactions);
+        const consumedUnspent = Transaction.getAllConsumed(newTransactions);
+
+        return curUnspent
+        .filter((unspent) => !Transaction.findUnspent(consumedUnspent,unspent))
+        .concat(newUnspent);
+    }
+
+    
     //grab all out transactions, create new unspent objects and add to personal list
-    getAllUnspent(newTransactions: Transaction[]): UnspentTransOut[] {
+    static getAllUnspent(newTransactions: Transaction[]): UnspentTransOut[] {
         return newTransactions
-            .map((trans) => {
-                return trans.transOutList.map((outTrans, i) => {
-                    return {
+        .map((trans) => {
+            return trans.transOutList.map((outTrans, i) => {
+                return {
                         id: trans.hash, 
                         index: i,
                         address: outTrans.address,
@@ -80,24 +93,34 @@ export class Transaction {
             })
             .reduce((a,b) => a.concat(b), []);
     }
-    
+        
     //grab all in transactions and remove the unspent objects that those reference from our personal list
-    getAllConsumed(newTransactions: Transaction[]): UnspentTransOut[] {
+    static getAllConsumed(newTransactions: Transaction[]): UnspentTransOut[] {
         return newTransactions
-            .map((trans) => trans.transInList) //grab all transIns from each transaction
-            .reduce((a,b) => a.concat(b), []) //make it into a 1D array
-            .map((transIn) => {
-                return { //create placeholder unspent object, just so we can filter by id and index later
-                    id: transIn.outId,
-                    index: transIn.outIndex,
-                    address: '',
-                    amount: 0
-                }
-            });
+        .map((trans) => trans.transInList) //grab all transIns from each transaction
+        .reduce((a,b) => a.concat(b), []) //make it into a 1D array
+        .map((transIn) => {
+            return { //create placeholder unspent object, just so we can filter by id and index later
+                id: transIn.outId,
+                index: transIn.outIndex,
+                address: '',
+                amount: 0
+            }
+        });
+    }
+        
+    //note: this only finds unspent object that matches with the id and index ONLY
+    static findUnspent(consumedUnspent: UnspentTransOut[], {id, index}: UnspentTransOut): boolean {
+        for (const u of consumedUnspent) {
+            if (u.id === id && u.index === index) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //helpers
-
+        
     //from https://github.com/lhartikk/naivecoin/blob/chapter3/src/transaction.ts
     static toHexString(byteArray: string) {
         return Array.from(byteArray, (byte: any) => {
