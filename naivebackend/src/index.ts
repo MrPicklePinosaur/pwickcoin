@@ -20,8 +20,39 @@ const server = app.listen(5000, () => {
 });
 
 //socket 
+enum MSG_TYPE {
+    JOINED = 'joined', //called when we join
+    OTHER_JOINED = 'other_joined', // called when another client joins
+    NEW_BLOCK = 'new_block', //called when a new block is mined
+}
+
 const io = socket(server);
 
-io.on('connection', (clientSocket) => {
+
+var connected: string[] = [];
+
+io.on('connection', (socket) => {
+
     console.log('successfully created socket connection');
+
+    //when someone connects
+    socket.on(MSG_TYPE.JOINED, (data: {address: string}) => {
+
+        //first, tell the newly connected client our current list connected addresses
+        socket.emit(MSG_TYPE.JOINED, {connected: connected});
+
+        //now add that new client to our master list
+        connected.push(data.address);
+
+        //and tell everyone else that someone has joined
+        socket.broadcast.emit(MSG_TYPE.OTHER_JOINED, {new_address: data.address});
+
+    });
+
+    //when someone finds a new block, just tell everyone
+    socket.on(MSG_TYPE.NEW_BLOCK, (data: {block: string}) => {
+        io.sockets.emit(MSG_TYPE.NEW_BLOCK, data);
+
+    });
 });
+
