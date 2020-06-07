@@ -13,6 +13,7 @@ export class Validation {
     - the current block's hash has to be valid
     
     - the proof of work must be valid
+    - time stamp must not be too far off
     */
     static validateBlock(block: Block, prevBlock: Block): boolean {
        
@@ -23,6 +24,8 @@ export class Validation {
         } else if (Block.calculateHash(block.index,block.previousHash,block.timeStamp,block.data,block.difficulty,block.proof) !== block.hash) {
             return false;
         } else if (Validation.verifyProofOfWork(block.hash,block.difficulty)) {
+            return false;
+        } else if (Validation.verifyTimeStamp(block.timeStamp,prevBlock.timeStamp)) {
             return false;
         }
 
@@ -55,8 +58,17 @@ export class Validation {
         return binHash.startsWith(prefix);
     }
 
-    static verifyTimeStamp() {
+    /* verifyTimeStamp()
+    a timestamp is valid if:
+    - it's no less than 1 min in the future of OUR current time
+    - it's no more than 1 min in the past of the prev block's timestamp
+    */
+    static verifyTimeStamp(timeStamp: number, prevTimeStamp: number): boolean {
 
+        if (timeStamp-60 > Validation.currentTimeStamp()) { return false; }
+        else if (prevTimeStamp-60 > timeStamp) { return false; }
+
+        return true;
     }
 
 
@@ -69,5 +81,9 @@ export class Validation {
         }
         return result;
 
+    }
+
+    static currentTimeStamp(): number {
+        return new Date().getTime()/1000;
     }
 }

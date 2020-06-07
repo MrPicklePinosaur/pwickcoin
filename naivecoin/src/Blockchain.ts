@@ -15,15 +15,26 @@ export class Blockchain {
         return this.blockchain[this.blockchain.length-1];
     }
 
-    //update chain if the new one is valid and it's longer than the current one
+    //update chain if the new one is valid and it had more computational power put into it
     updateChain(newChain: Block[]) {
-        if (Validation.validateBlockChain(newChain) && newChain.length > this.blockchain.length) {
+        if (Validation.validateBlockChain(newChain) && Blockchain.cumulativeDifficulty(newChain) > Blockchain.cumulativeDifficulty(this.blockchain)) {
             //use new chain 
             this.blockchain = newChain;
             //broadcast the message
             console.log('accepted new');
         }
         
+    }
+
+    //calculate the difficulty it took to generate this chain
+    static cumulativeDifficulty(blockchain: Block[]): number { 
+
+        var difficulty = 0;
+        for (const b of blockchain) {
+            difficulty += Math.pow(2,b.difficulty);
+        }
+        return difficulty;
+
     }
 
 

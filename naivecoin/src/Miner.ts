@@ -1,6 +1,8 @@
 import { Block } from './Block'
 import { Validation } from './Validation'
 
+//listens for transaction requests and tries to produce a valid block with transations included, then broadcast
+
 export default class Miner {
 
     
