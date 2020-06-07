@@ -1,7 +1,7 @@
 import io from 'socket.io-client'
 import { Wallet } from './Wallet';
 import { Blockchain } from './Blockchain';
-import { Transaction } from './Transaction';
+import { Transaction, UnspentTransOut } from './Transaction';
 import { Miner } from './Miner';
 import { Block } from './Block';
 import { Validation } from './Validation';
@@ -21,6 +21,7 @@ export class Network {
     //user info
     wallet: Wallet;
     blockchain: Blockchain; //our local copy of the blockchain
+    unspentTrans: UnspentTransOut[] = [];
 
     constructor(serverUrl: string) {
 

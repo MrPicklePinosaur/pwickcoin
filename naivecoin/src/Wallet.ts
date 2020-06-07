@@ -1,5 +1,6 @@
 import * as ecdsa from 'elliptic'
 import { Blockchain } from './Blockchain';
+import { UnspentTransOut } from './Transaction';
 
 export const ec = new ecdsa.ec('secp256k1');
 
@@ -12,12 +13,6 @@ export class Wallet {
         this.privateKey = Wallet.generatePrivateKey();
         this.publicKey = Wallet.generatePublicKey(this.privateKey);
     }
-
-    /*
-    static getWalletBalance(blockchain: Blockchain): number {
-
-    }
-    */
 
     static generatePublicKey(privateKey: string): string {
         const key = ec.keyFromPrivate(privateKey,'hex');

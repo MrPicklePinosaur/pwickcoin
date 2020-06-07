@@ -49,6 +49,64 @@ export class Transaction {
 
     }
 
+
+    static getWalletBalance(unspentArray: UnspentTransOut[], ownerAddress: string): number {
+        return unspentArray
+        .filter((unspent) => unspent.address === ownerAddress)
+        .map((unspent) => unspent.amount)
+        .reduce((a,b) => a+b, 0);
+    }   
+
+    static createNewTransaction(recipentAddress: string, senderAddress: string, amount: number, senderUnspent: UnspentTransOut[]): Transaction {
+
+        const {unspentToUse, overpay} = Transaction.findUnspentForTransaction(amount,senderUnspent);
+
+        //generate the inputs to the transaction by converting unspent into input tokens
+        var transIn: TransIn[] = unspentToUse.map(({id,index}: UnspentTransOut) => {
+            return {
+                outId: id,
+                outIndex: index,
+                signature: ''
+            };
+        });
+
+        //generate 
+        var transOut: TransOut[] = [];
+
+        transOut.push({ //the token we pay to the recipient
+            address: recipentAddress,
+            amount: amount
+        });
+        if (overpay > 0) { //the token we pay ourselves as change
+            transOut.push({ 
+                address: senderAddress,
+                amount: overpay
+            });
+        }
+
+        return new Transaction(transIn,transOut);
+
+    }
+
+    //generates the trans out objects for a given transaction
+    static findUnspentForTransaction(amount: number, senderUnspent: UnspentTransOut[]) {
+        var curValue = 0;
+        var unspentToUse: UnspentTransOut[] = []; //the tokens we will use to make the payment
+        
+        for (const unspent of senderUnspent) {
+            curValue += unspent.amount;
+            unspentToUse.push(unspent);
+
+            //once we have found enough tokens to make the payment
+            if (curValue >= amount) {
+                const overpay = curValue - amount; //make 'change'
+                return { unspentToUse: unspentToUse, overpay: overpay };
+            }
+        }
+        //if we didnt have enough coins
+        throw Error('Not enough balance to make payment');
+    }
+
     //not finished
     /*
     static signTransaction({hash,transInList}: Transaction, transInIndex: number, privateKey: string): string {
