@@ -1,25 +1,19 @@
 import { Blockchain } from './Blockchain'
 import { Miner } from './Miner'
 import { Wallet } from './Wallet'
+import { Transaction } from './Transaction'
+import { Network } from './Network'
 
-import io from 'socket.io-client'
+//init server
 
-enum MSG {
-    NEW_TRANSACTION
-}
-
+/*
+var w = new Wallet();
 const bc = new Blockchain();
 
-var w = new Wallet();
-
-
-//const socket = io.connect('http://localhost:5000');
-
-//start mining for genesis
-/*
-bc.blockchain.push(Miner.generateBlock('genesis',bc));
-console.log(bc);
-bc.blockchain.push(Miner.generateBlock('block 1',bc));
+var transactions: Transaction[] = []; //the transaction the miner recieves
+var block_reward: Transaction = new Transaction([], [{address: w.publicKey,amount: 100}]);
+var newBlock = Miner.generateBlock(transactions, block_reward, bc);
+bc.blockchain.push(newBlock);
 console.log(bc);
 */
-//socket.emit();
+var network = new Network('http://localhost:5000');

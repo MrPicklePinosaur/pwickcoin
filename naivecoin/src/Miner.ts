@@ -1,6 +1,7 @@
 import { Block } from './Block'
 import { Validation } from './Validation'
 import { Blockchain } from './Blockchain';
+import { Transaction } from './Transaction';
 
 //listens for transaction requests and tries to produce a valid block with transations included, then broadcast
 
@@ -8,7 +9,10 @@ export class Miner {
 
     //mining
     
-    static generateBlock(blockData: string, blockchain: Blockchain): Block {
+
+
+    //prob dont need to have blockreward as param
+    static generateBlock(transactions: Transaction[], blockReward: Transaction,blockchain: Blockchain): Block {
         const chain = blockchain.blockchain;
         const prevBlock = (chain.length>0)?chain[chain.length-1]:null;
 
@@ -18,6 +22,9 @@ export class Miner {
 
         //insert diffiulty adjustment
         const difficulty = 5; //PLACEHOLDER
+
+        transactions.unshift(blockReward); //the miner adds a reward for themself
+        const blockData = JSON.stringify(transactions);
 
         const proof = Miner.calculateProofOfWork(nextInd,prevHash,timeStamp,blockData,difficulty); //PLACEHOLDER
 

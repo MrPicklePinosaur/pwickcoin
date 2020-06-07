@@ -74,7 +74,7 @@ export class Validation {
 
     //transaction =-=-=-=-=-=-=-=
     static verifyTransactionHash(transaction: Transaction): boolean {
-        return Transaction.calculateTransactionHash(transaction) === transaction.hash;
+        return Transaction.calculateTransactionHash(transaction.transInList,transaction.transOutList) === transaction.hash;
     }
 
     static verifyTransactionInputs(): boolean {
@@ -84,6 +84,8 @@ export class Validation {
     static verifyTransactionOutputs(): boolean {
         return false;
     }
+
+    //add block_reward validation
 
 
     //helpers

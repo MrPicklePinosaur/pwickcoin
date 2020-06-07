@@ -4,7 +4,7 @@ export const ec = new ecdsa.ec('secp256k1');
 
 export class Wallet {
 
-    privateKey: string; //this is non-persistant for now, possibly store in local storage later
+    private privateKey: string; //this is non-persistant for now, possibly store in local storage later
     public publicKey: string; //also know as the address
 
     constructor() {

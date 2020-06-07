@@ -1,11 +1,13 @@
 import sha256 from 'crypto-js/sha256'
 
+export const BLOCK_REWARD = 50; //amount of units rewarded to a miner who finds a block
+
 export type TransIn = {
 
     outId: string, //reference to unspent money (UnspentTransOut)
     outIndex: number, 
     signature: string
-    
+
 }
 
 export type TransOut = {
@@ -20,19 +22,20 @@ export type UnspentTransOut = { //leftover money from transaction, made as a tra
     readonly amount: number
 }
 
-//the request that each person makes
 export class Transaction {
 
-    public hash: string = ''; //calculated using the contents of transInList and transOutList
-    public transInList: TransIn[] = [];
-    public transOutList: TransOut[] = [];
+    public hash: string; //calculated using the contents of transInList and transOutList
+    public transInList: TransIn[];
+    public transOutList: TransOut[];
 
-    constructor() {
-        //generate a random id for this
+    constructor(transInList: TransIn[], transOutList: TransOut[]) {
+        this.transInList = transInList;
+        this.transOutList = transOutList;
+        this.hash = Transaction.calculateTransactionHash(this.transInList,this.transOutList);
     }
 
     //only use when transaction object is full
-    static calculateTransactionHash({transInList, transOutList}: Transaction): string {
+    static calculateTransactionHash(transInList: TransIn[], transOutList: TransOut[]): string {
 
         const transInString = transInList
             .map(({outId, outIndex}: TransIn) => outId+outIndex )
