@@ -28,8 +28,16 @@ export class Miner {
 
         const proof = Miner.calculateProofOfWork(nextInd,prevHash,timeStamp,blockData,difficulty); //PLACEHOLDER
 
-        const hash = Block.calculateHash(nextInd,prevHash,timeStamp,blockData,difficulty,proof);
-        const newBlock = new Block(nextInd,hash,prevHash,timeStamp,blockData,difficulty,proof);
+        const hash = Validation.calculateBlockHash(nextInd,prevHash,timeStamp,blockData,difficulty,proof);
+        const newBlock: Block = {
+            index: nextInd,
+            hash: hash,
+            previousHash: prevHash,
+            timeStamp: timeStamp,
+            data: blockData,
+            difficulty: difficulty,
+            proof: proof
+        };
         return newBlock;
     }
     
@@ -40,7 +48,7 @@ export class Miner {
         var curProof = 0;
         while(true) { //commence le mining
 
-            const newHash = Block.calculateHash(index,prevHash,timeStamp,blockData,difficulty,curProof);
+            const newHash = Validation.calculateBlockHash(index,prevHash,timeStamp,blockData,difficulty,curProof);
             //check to see if the hash matches the difficulty
             if (Validation.verifyProofOfWork(newHash,difficulty)) {
                 return curProof;

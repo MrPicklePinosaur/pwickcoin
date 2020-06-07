@@ -1,6 +1,6 @@
 import { Block } from './Block'
 import { Transaction } from './Transaction'
-
+import sha256 from 'crypto-js/sha256'
 //collection of methods to validate a block
 
 export class Validation {
@@ -22,7 +22,7 @@ export class Validation {
             return false;
         } else if (prevBlock.hash !== block.previousHash) {
             return false;
-        } else if (Block.calculateHash(block.index,block.previousHash,block.timeStamp,block.data,block.difficulty,block.proof) !== block.hash) {
+        } else if (Validation.calculateBlockHash(block.index,block.previousHash,block.timeStamp,block.data,block.difficulty,block.proof) !== block.hash) {
             return false;
         } else if (Validation.verifyProofOfWork(block.hash,block.difficulty)) {
             return false;
@@ -57,6 +57,10 @@ export class Validation {
         const binHash = Validation.hashHexToBin(hash);
         const prefix = '0'.repeat(difficulty); //hash must start with this many zeroes
         return binHash.startsWith(prefix);
+    }
+
+    static calculateBlockHash(index: number, previousHash: string, timeStamp: number, data: string, difficulty: number, proof: number): string {
+        return sha256(index+previousHash+timeStamp+data+difficulty+proof).toString();
     }
 
     /* verifyTimeStamp()

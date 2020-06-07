@@ -22,7 +22,8 @@ const server = app.listen(5000, () => {
 //socket 
 enum MSG_TYPE {
     JOINED = 'joined', //called when we join
-    OTHER_JOINED = 'other_joined' // called when another client joins
+    OTHER_JOINED = 'other_joined', // called when another client joins
+    NEW_BLOCK = 'new_block', //called when a new block is mined
 }
 
 const io = socket(server);
@@ -48,5 +49,10 @@ io.on('connection', (socket) => {
 
     });
 
+    //when someone finds a new block, just tell everyone
+    socket.on(MSG_TYPE.NEW_BLOCK, (data: {block: string}) => {
+        io.sockets.emit(MSG_TYPE.NEW_BLOCK, data);
+
+    });
 });
 
