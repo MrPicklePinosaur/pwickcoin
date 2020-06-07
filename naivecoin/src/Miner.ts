@@ -1,14 +1,17 @@
 import { Block } from './Block'
 import { Validation } from './Validation'
+import { Blockchain } from './Blockchain';
 
 //listens for transaction requests and tries to produce a valid block with transations included, then broadcast
 
-export default class Miner {
+export class Miner {
 
-    
     //mining
     
-    static generateBlock(blockData: string, prevBlock: Block): Block {
+    static generateBlock(blockData: string, blockchain: Blockchain): Block {
+        const chain = blockchain.blockchain;
+        const prevBlock = (chain.length>0)?chain[chain.length-1]:null;
+
         const nextInd = (prevBlock!=null) ? prevBlock.index+1 : 0; //if there is no previous, it's a genesis and set ind to 0
         const prevHash = (prevBlock!=null) ? prevBlock.hash : '';
         const timeStamp = new Date().getTime()/1000;

@@ -1,13 +1,11 @@
 import sha256 from 'crypto-js/sha256'
-import * as ecdsa from 'elliptic'
-
-export const ec = new ecdsa.ec('secp256k1');
 
 export type TransIn = {
 
     outId: string, //reference to unspent money (UnspentTransOut)
     outIndex: number, 
     signature: string
+    
 }
 
 export type TransOut = {
@@ -49,6 +47,7 @@ export class Transaction {
     }
 
     //not finished
+    /*
     static signTransaction({hash,transInList}: Transaction, transInIndex: number, privateKey: string): string {
 
         const transIn = transInList[transInIndex]; //the specific transaction we are signing
@@ -58,6 +57,7 @@ export class Transaction {
 
         return signature;
     }
+    */
 
 
     //UPON RECIEVING NEW BLOCK
@@ -101,11 +101,5 @@ export class Transaction {
             return ('0' + (byte & 0xFF).toString(16)).slice(-2);
         }).join('');
     };
-
-    static generateKeyPair() {
-        return ec.genKeyPair();
-    }
-
-
 
 }
