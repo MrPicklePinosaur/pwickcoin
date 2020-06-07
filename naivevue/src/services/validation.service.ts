@@ -1,6 +1,29 @@
 import { Block, calculateBlockHash } from './block.service'
 import { hashHexToBin, currentTimeStamp } from './helper.service'
 
+
+//the hash must start with the same amount of zeroes as specific by the difficulty
+export const verifyProofOfWork = (hash: string, difficulty: number): boolean => {
+    //the hash comes in as hex 
+    const binHash = hashHexToBin(hash);
+    const prefix = '0'.repeat(difficulty)
+    //hash must start with this many zeroes
+    return binHash.startsWith(prefix);
+}
+
+/* verifyTimeStamp()
+a timestamp is valid if:
+- it's no less than 1 min in the future of OUR current time
+- it's no more than 1 min in the past of the prev block's timestamp
+*/
+export const verifyTimeStamp = (timeStamp: number, prevTimeStamp: number): boolean => {
+
+    if (timeStamp-60 > currentTimeStamp()) { return false; }
+    else if (prevTimeStamp-60 > timeStamp) { return false; }
+
+    return true;
+}
+
 //validateBlock() - used to validate any given block
 /* For a block to be valid
 - It's index must be one higher than the prev block
@@ -44,7 +67,7 @@ export const validateBlockChain = (newChain: Block[]): boolean => {
     //check if the genesis matches
     
     //go through entire chain and validate all the blocks
-    for (var i = 1; i < newChain.length; i++) {
+    for (let i = 1; i < newChain.length; i++) {
         if (!validateBlock(newChain[i],newChain[i-1])) {
             console.log(`failed at block number ${i}`)
             return false;
@@ -53,29 +76,3 @@ export const validateBlockChain = (newChain: Block[]): boolean => {
     
     return true;
 }
-
-
-//the hash must start with the same amount of zeroes as specific by the difficulty
-export const verifyProofOfWork = (hash: string, difficulty: number): boolean => {
-    //the hash comes in as hex 
-    const binHash = hashHexToBin(hash);
-    const prefix = '0'.repeat(difficulty)
-    //hash must start with this many zeroes
-    return binHash.startsWith(prefix);
-}
-
-/* verifyTimeStamp()
-a timestamp is valid if:
-- it's no less than 1 min in the future of OUR current time
-- it's no more than 1 min in the past of the prev block's timestamp
-*/
-export const verifyTimeStamp = (timeStamp: number, prevTimeStamp: number): boolean => {
-
-    if (timeStamp-60 > currentTimeStamp()) { return false; }
-    else if (prevTimeStamp-60 > timeStamp) { return false; }
-
-    return true;
-}
-
-
-
