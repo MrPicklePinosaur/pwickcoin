@@ -19,12 +19,13 @@ import { generateBlock } from '@/services/miner.service'
 import { Transaction } from '@/services/transaction.service'
 
 const ledger = namespace('Ledger')
+const wallet = namespace('Wallet')
 
 @Component
 export default class HelloWorld extends Vue {
 
   //move this to store later or sm
-  addresses: string[] = [] //all other clients connected to network
+  addresses: string[] = []; //all other clients connected to network
 
   mine() {
     const transaction: Transaction[] = [{hash:'',transInList:[],transOutList:[]}];
@@ -36,14 +37,17 @@ export default class HelloWorld extends Vue {
   }
 
   @ledger.State
-  public blockchain!: Block[]
+  public blockchain!: Block[];
+
+  @wallet.State
+  public publicKey!: string;
 
   @ledger.Mutation
   public addBlock!: (params: {block: Block}) => void
 
   @Socket()
   connect() {
-    this.$socket.client.emit(MSG_TYPE.JOINED, {address: 'adasdasdasd'});
+    this.$socket.client.emit(MSG_TYPE.JOINED, {address: this.publicKey});
   }
 
   @Socket(MSG_TYPE.JOINED) //when we first establish connection, the server will give us a list of other clients
