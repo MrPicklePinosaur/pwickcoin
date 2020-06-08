@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
 app.use('/', router);
 app.use('/pwickcoin', pwickcoinRouter);
 
-const server = app.listen(5000, () => {
+const server = app.listen(5000, '0.0.0.0', () => {
     console.log('listening on 5000');
 });
 

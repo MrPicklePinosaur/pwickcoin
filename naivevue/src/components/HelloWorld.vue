@@ -1,17 +1,22 @@
 <template>
   <div class="hello">
-    
-    <el-button type="primary" @click="increment">{{ blockchain.length }}</el-button>
+    <p>Connected clients</p>
+    <p>{{this.addresses}}</p>
+
+    <el-button type="primary" @click="mine">MINE!</el-button>
     <p v-text="JSON.stringify(blockchain)"></p>
+
   </div>
 </template>
 
 <script lang="ts">
 import { Block } from '@/services/block.service'
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { Socket } from 'vue-socket.io-extended'
 import { MSG_TYPE } from '@/services/socket.service'
+import { generateBlock } from '@/services/miner.service'
+import { Transaction } from '@/services/transaction.service'
 
 const ledger = namespace('Ledger')
 
@@ -21,23 +26,20 @@ export default class HelloWorld extends Vue {
   //move this to store later or sm
   addresses: string[] = [] //all other clients connected to network
 
-  increment() { 
-    this.addBlock({
-      index: 0,
-      hash: 'asdadas',
-      previousHash: 'asdsad',
-      timeStamp: 12,
-      data: 'data',
-      difficulty: 5,
-      proof: 2
-    }); 
+  mine() {
+    const transaction: Transaction[] = [{hash:'',transInList:[],transOutList:[]}];
+    const newBlock = generateBlock(transaction,this.blockchain);
+    //this.addBlock({block: newBlock});
+
+    //broadcast that we found a block
+    this.$socket.client.emit(MSG_TYPE.NEW_BLOCK, {block: JSON.stringify(newBlock)});
   }
 
   @ledger.State
   public blockchain!: Block[]
 
   @ledger.Mutation
-  public addBlock!: (newBlock: Block) => void
+  public addBlock!: (params: {block: Block}) => void
 
   @Socket()
   connect() {
@@ -54,6 +56,19 @@ export default class HelloWorld extends Vue {
   onOtherJoin(data: {new_address: string}) {
     console.log(`User with address ${data.new_address.substring(0,10)}... has joined`);
     this.addresses.push(data.new_address);
+  }
+
+  @Socket(MSG_TYPE.NEW_BLOCK)
+  onNewBlock(data: {block: string}) {
+    const newBlock: Block = JSON.parse(data.block);
+
+    console.log(`new block has been found ${newBlock.hash}`);
+
+    //do verification stuff here and stuffs
+
+    //add it to our block chain
+    this.addBlock({block: newBlock});
+
   }
 }
 

@@ -1,4 +1,4 @@
-import { VuexModule, Module, Mutation } from "vuex-module-decorators";
+import { VuexModule, Module, Mutation, Action } from "vuex-module-decorators";
 
 import { Block } from "../services/block.service";
 import { Transaction } from '../services/transaction.service'
@@ -11,10 +11,9 @@ class Ledger extends VuexModule {
     public blockchain: Block[] = [];
 
     @Mutation
-    public addBlock(params: {transactions: Transaction[]}) {
+    public addBlock(params: {block: Block}) {
         //validate and do cool stuff here
-        const newBlock = generateBlock(params.transactions,this.blockchain);
-        this.blockchain.push(newBlock);
+        this.blockchain.push(params.block);
     }
 
 }
