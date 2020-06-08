@@ -6,6 +6,7 @@
     <el-button type="primary" @click="mine">MINE!</el-button>
     <p v-text="JSON.stringify(blockchain)"></p>
 
+    <p>Current Wallet Balance {{this.currentBalance}}</p>
   </div>
 </template>
 
@@ -16,7 +17,7 @@ import { namespace } from 'vuex-class'
 import { Socket } from 'vue-socket.io-extended'
 import { MSG_TYPE } from '@/services/socket.service'
 import { generateBlock } from '@/services/miner.service'
-import { Transaction } from '@/services/transaction.service'
+import { Transaction, createTransactionObject } from '@/services/transaction.service'
 
 const ledger = namespace('Ledger')
 const wallet = namespace('Wallet')
@@ -28,8 +29,10 @@ export default class HelloWorld extends Vue {
   addresses: string[] = []; //all other clients connected to network
 
   mine() {
-    const transaction: Transaction[] = [{hash:'',transInList:[],transOutList:[]}];
-    const newBlock = generateBlock(transaction,this.blockchain);
+    const blockReward: Transaction = createTransactionObject([],[{address: this.publicKey, amount: 100}]); 
+    const transactions: Transaction[] = [blockReward];
+
+    const newBlock = generateBlock(transactions,this.blockchain);
     //this.addBlock({block: newBlock});
 
     //broadcast that we found a block
@@ -41,6 +44,9 @@ export default class HelloWorld extends Vue {
 
   @wallet.State
   public publicKey!: string;
+
+  @ledger.Getter
+  public currentBalance!: number;
 
   @ledger.Mutation
   public addBlock!: (params: {block: Block}) => void

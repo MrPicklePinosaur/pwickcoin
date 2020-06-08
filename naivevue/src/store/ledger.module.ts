@@ -1,7 +1,7 @@
 import { VuexModule, Module, Mutation, Action } from "vuex-module-decorators";
 
 import { Block } from "../services/block.service";
-import { Transaction, UnspentTransOut } from '../services/transaction.service'
+import { Transaction, UnspentTransOut, updateUnspent } from '../services/transaction.service'
 import { generateBlock } from '../services/miner.service'
 
 @Module({ namespaced: true, name: "ledger"})
@@ -10,8 +10,8 @@ class Ledger extends VuexModule {
     public blockchain: Block[] = [];
     public unspentTransactions: UnspentTransOut[] = [];
 
-    public getCurrentBalance() {
-        const ownAddress = this.context.rootState.wallet.publicKey;
+    get currentBalance(): number {
+        const ownAddress = this.context.rootState.Wallet.publicKey;
 
         return this.unspentTransactions
         .filter((unspent) => unspent.address === ownAddress)
@@ -22,7 +22,14 @@ class Ledger extends VuexModule {
     @Mutation
     public addBlock(params: {block: Block}) {
         //validate and do cool stuff here
+
+        //add block to our own blockchain
         this.blockchain.push(params.block);
+
+        //read transaction and update our own unspentTransactions
+        const parsedTransaction: Transaction[] = JSON.parse(params.block.data);
+
+        this.unspentTransactions = updateUnspent(parsedTransaction,this.unspentTransactions);
     }
 
 }

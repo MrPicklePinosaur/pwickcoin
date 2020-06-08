@@ -40,50 +40,21 @@ export const calculateTransactionHash = (transInList: TransIn[], transOutList: T
     return sha256(transInString+transOutString).toString();
 
 }
-
-export const createNewTransaction = (recipentAddress: string, senderAddress: string, amount: number, senderUnspent: UnspentTransOut[]): Transaction  => {
-
-    const {unspentToUse, overpay} = findUnspentForTransaction(amount,senderUnspent);
-
-    //generate the inputs to the transaction by converting unspent into input tokens
-    var transIn: TransIn[] = unspentToUse.map(({id,index}: UnspentTransOut) => {
-        return {
-            outId: id,
-            outIndex: index,
-            signature: ''
-        };
-    });
-
-    //generate 
-    var transOut: TransOut[] = [];
-
-    transOut.push({ //the token we pay to the recipient
-        address: recipentAddress,
-        amount: amount
-    });
-    if (overpay > 0) { //the token we pay ourselves as change
-        transOut.push({ 
-            address: senderAddress,
-            amount: overpay
-        });
+//automatically generates a transaction object with the hash
+export const createTransactionObject = (transIn: TransIn[], transOut: TransOut[]): Transaction => {
+    const hash = calculateTransactionHash(transIn,transOut);
+    const newTrans: Transaction = {
+        hash: hash,
+        transInList: transIn,
+        transOutList: transOut,
     }
-
-    //calculate transaction hash
-    const hash = calculateTransactionHash(transIn, transOut);
-    const newTrans = { 
-        hash: hash, 
-        transInList: transIn, 
-        transOutList: transOut 
-    };  
-
     return newTrans;
-
 }
 
 //generates the trans out objects for a given transaction
 export const findUnspentForTransaction = (amount: number, senderUnspent: UnspentTransOut[]) => {
-    var curValue = 0;
-    var unspentToUse: UnspentTransOut[] = []; //the tokens we will use to make the payment
+    let curValue = 0;
+    const unspentToUse: UnspentTransOut[] = []; //the tokens we will use to make the payment
     
     for (const unspent of senderUnspent) {
         curValue += unspent.amount;
@@ -99,6 +70,39 @@ export const findUnspentForTransaction = (amount: number, senderUnspent: Unspent
     throw Error('Not enough balance to make payment');
 }
 
+export const createNewTransaction = (recipentAddress: string, senderAddress: string, amount: number, senderUnspent: UnspentTransOut[]): Transaction  => {
+
+    const {unspentToUse, overpay} = findUnspentForTransaction(amount,senderUnspent);
+
+    //generate the inputs to the transaction by converting unspent into input tokens
+    const transIn: TransIn[] = unspentToUse.map(({id,index}: UnspentTransOut) => {
+        return {
+            outId: id,
+            outIndex: index,
+            signature: ''
+        };
+    });
+
+    //generate 
+    const transOut: TransOut[] = [];
+
+    transOut.push({ //the token we pay to the recipient
+        address: recipentAddress,
+        amount: amount
+    });
+    if (overpay > 0) { //the token we pay ourselves as change
+        transOut.push({ 
+            address: senderAddress,
+            amount: overpay
+        });
+    }
+
+
+    return createTransactionObject(transIn,transOut);
+
+}
+
+
 //sign all input transactions
 export const signTransaction = ({hash,transInList}: Transaction, privateKey: string) => {
     transInList
@@ -109,19 +113,6 @@ export const signTransaction = ({hash,transInList}: Transaction, privateKey: str
 }
 
 //UPON RECIEVING NEW BLOCK
-
-export const updateUnspent = (newTransactions: Transaction[], curUnspent: UnspentTransOut[]) => {
-    //verify the validity of the transaction here
-
-    //now update the local unspent
-    const newUnspent = getAllUnspent(newTransactions);
-    const consumedUnspent = getAllConsumed(newTransactions);
-
-    return curUnspent
-    .filter((unspent) => !findUnspent(consumedUnspent,unspent))
-    .concat(newUnspent);
-}
-
 
 //grab all out transactions, create new unspent objects and add to personal list
 export const getAllUnspent = (newTransactions: Transaction[]): UnspentTransOut[] => {
@@ -162,4 +153,16 @@ export const findUnspent = (consumedUnspent: UnspentTransOut[], {id, index}: Uns
         }
     }
     return false;
+}
+
+export const updateUnspent = (newTransactions: Transaction[], curUnspent: UnspentTransOut[]) => {
+    //verify the validity of the transaction here
+
+    //now update the local unspent
+    const newUnspent = getAllUnspent(newTransactions);
+    const consumedUnspent = getAllConsumed(newTransactions);
+
+    return curUnspent
+    .filter((unspent) => !findUnspent(consumedUnspent,unspent))
+    .concat(newUnspent);
 }
