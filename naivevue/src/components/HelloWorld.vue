@@ -3,6 +3,21 @@
     <p>Connected clients</p>
     <p>{{this.addresses}}</p>
 
+    <p>Make Transaction</p>
+    <el-form :model="form" style="width: 25vw; margin: auto; background-color: rgb(200,200,200); padding: 2rem; border-radius: 5px">
+      <el-form-item label="Recipient Address">
+        <el-input v-model="form.address" placeholder="address"></el-input>
+      </el-form-item>
+
+      <el-form-item label="Amount">
+        <el-input v-model="form.amount" type="number" placeholder="amount"></el-input>
+      </el-form-item>
+
+      <el-form-item>
+        <el-button type="primary" @click.prevent="onSubmit">Send</el-button>
+      </el-form-item>
+    </el-form>
+
     <el-button type="primary" @click="mine">MINE!</el-button>
     <p v-text="JSON.stringify(blockchain)"></p>
 
@@ -27,6 +42,16 @@ export default class HelloWorld extends Vue {
 
   //move this to store later or sm
   addresses: string[] = []; //all other clients connected to network
+
+  form = {
+    address: '',
+    amount: 0
+  }
+
+  //read form data, make new transaction and then broadcast
+  onSubmit() {
+    
+  }
 
   mine() {
     const blockReward: Transaction = createTransactionObject([],[{address: this.publicKey, amount: 100}]); 
