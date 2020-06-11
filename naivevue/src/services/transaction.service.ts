@@ -97,7 +97,6 @@ export const createNewTransaction = (recipentAddress: string, senderAddress: str
         });
     }
 
-
     return createTransactionObject(transIn,transOut);
 
 }

@@ -28,6 +28,7 @@ class Ledger extends VuexModule {
 
         //read transaction and update our own unspentTransactions
         const parsedTransaction: Transaction[] = JSON.parse(params.block.data);
+        // console.log(parsedTransaction);
 
         this.unspentTransactions = updateUnspent(parsedTransaction,this.unspentTransactions);
     }

@@ -19,9 +19,11 @@
     </el-form>
 
     <el-button type="primary" @click="mine">MINE!</el-button>
-    <p v-text="JSON.stringify(blockchain)"></p>
+    <p v-text="blockchain"></p>
 
     <p>Current Wallet Balance {{this.currentBalance}}</p>
+
+    <p v-text="unspentTransactions"></p>
   </div>
 </template>
 
@@ -32,7 +34,7 @@ import { namespace } from 'vuex-class'
 import { Socket } from 'vue-socket.io-extended'
 import { MSG_TYPE } from '@/services/socket.service'
 import { generateBlock } from '@/services/miner.service'
-import { Transaction, createTransactionObject } from '@/services/transaction.service'
+import { Transaction, createTransactionObject, createNewTransaction, UnspentTransOut, signTransaction } from '@/services/transaction.service'
 
 const ledger = namespace('Ledger')
 const wallet = namespace('Wallet')
@@ -43,13 +45,30 @@ export default class HelloWorld extends Vue {
   //move this to store later or sm
   addresses: string[] = []; //all other clients connected to network
 
+  //find a better way to string type this
   form = {
     address: '',
-    amount: 0
+    amount: ''
   }
 
   //read form data, make new transaction and then broadcast
   onSubmit() {
+    console.log(this.form);
+
+    //check validity of form here
+    
+
+    const trans = createNewTransaction(this.form.address,this.publicKey,parseInt(this.form.amount),this.unspentTransactions);
+    //sign transaction
+    signTransaction(trans,this.privateKey);
+
+    //TODO: now broadcast out transaction to miners
+
+    //just create a brand new block for now
+    const transactions: Transaction[] = [trans];
+
+    const newBlock = generateBlock(transactions,this.blockchain);
+    this.$socket.client.emit(MSG_TYPE.NEW_BLOCK, {block: JSON.stringify(newBlock)});
     
   }
 
@@ -67,8 +86,14 @@ export default class HelloWorld extends Vue {
   @ledger.State
   public blockchain!: Block[];
 
+  @ledger.State
+  public unspentTransactions!: UnspentTransOut[];
+  
   @wallet.State
   public publicKey!: string;
+
+  @wallet.State
+  public privateKey!: string;
 
   @ledger.Getter
   public currentBalance!: number;
