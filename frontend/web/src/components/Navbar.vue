@@ -1,9 +1,13 @@
 <template>
-    <div v-if="loggedIn">
-        <router-link to="/summary">Summary</router-link> |
-        <router-link to="/about">About</router-link>
+    <div>
+        <div v-if="loggedIn">
 
-        <button @click.prevent="onLogout">Logout</button>
+            <router-link to="/summary">Summary</router-link> |
+            <router-link to="/about">About</router-link>
+
+            <button @click.prevent="onLogout">Logout</button>
+        </div>
+        
     </div>
 </template>
 
@@ -13,10 +17,12 @@ export default {
 
     computed: {
         loggedIn(){
-            console.log("testing")
+
+            console.log(localStorage.getItem('jwt'))
             if (localStorage.getItem('jwt') == null) {
                 return false
             } else {
+                
                 return true
             }
         }
